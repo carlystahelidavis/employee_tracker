@@ -73,6 +73,42 @@ function viewAllEmployees() {
         console.table(results)
     })
 }
+function addDepartment() {
+    inquirer.prompt([
+        {
+            type: 'input',
+            message: 'What department would you like to add?',
+            name: 'newDepartment'
+        }
+    ])
+        .then((data) => {
+            db.query("INSERT INTO department", function (err, results) {
+                if (err) {
+                    console.log(err)
+                    return
+                }
+                console.table(results)
+            })
+        })
+}
+function addRole() {
+    db.query("INSERT INTO role", function (err, results) {
+        if (err) {
+            console.log(err)
+            return
+        }
+        console.table(results)
+    })
+}
+function addEmployee() {
+    db.query("INSERT INTO employee", function (err, results) {
+        if (err) {
+            console.log(err)
+            return
+        }
+        console.table(results)
+    })
+}
 displayMenu();
 //init function calls selection function. Thats where the inquirer options begin. It will create the prompt lists. If prompt answer
 // === option run the db.query function. console.table shows the results in table format. would need to install with npm i
