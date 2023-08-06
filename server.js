@@ -9,26 +9,102 @@ const db = mysql.createConnection(
   },
   console.log("Connected to Database.")
 );
-
+//Gets all the latest departments into an array
+function latestAllDepartmentsArray() {
+  const departments = new Promise((resolve, reject) => {
+    db.query("SELECT * FROM department", async function (err, results) {
+      if (err) {
+        console.log(err);
+        reject(err);
+      }
+      resolve(results);
+    });
+  });
+  return departments;
+}
+//Gets all the latest roles into an array
+function latestAllRolesArray() {
+  const roles = new Promise((resolve, reject) => {
+    db.query("SELECT title FROM role", async function (err, results) {
+      if (err) {
+        console.log(err);
+        reject(err);
+      }
+      console.log(results);
+      const rolesList = results.map(({ title: value }) => value);
+      resolve(rolesList);
+    });
+  });
+  return roles;
+}
+//Gets all the latest employees into an array
+function latestAllEmployeesArray() {
+  const employees = new Promise((resolve, reject) => {
+    db.query(
+      "SELECT first_name, last_name FROM employee",
+      async function (err, results) {
+        if (err) {
+          console.log(err);
+          reject(err);
+        }
+        const employeeList = results.map(
+          ({ first_name: value1, last_name: value2 }) => `${value1} ${value2}`
+        );
+        resolve(employeeList);
+      }
+    );
+  });
+  return employees;
+}
+//Gets the department ID
+function getDepartmentID(department) {
+  const departmentID = new Promise((resolve, reject) => {
+    db.query(
+      `SELECT id FROM department WHERE name = '${department}'`,
+      async function (err, results) {
+        if (err) {
+          console.log(err);
+          reject(err);
+        }
+        resolve(results[0].id);
+      }
+    );
+  });
+  return departmentID;
+}
+//Gets the role ID
+function getRoleID(role) {
+  const roleID = new Promise((resolve, reject) => {
+    db.query(
+      `SELECT id FROM role WHERE title = '${role}'`,
+      async function (err, results) {
+        if (err) {
+          console.log(err);
+          reject(err);
+        }
+        resolve(results[0].id);
+      }
+    );
+  });
+  return roleID;
+}
+//Shows the menu opening up options in Inquirer
 function displayMenu() {
-  //Presents the options through inquirer
   inquirer
-    .prompt([
-      {
-        type: "list",
-        message: "Please select an action below",
-        name: "menuChoice",
-        choices: [
-          "view all departments",
-          "view all roles",
-          "view all employees",
-          "add a department",
-          "add a role",
-          "add an employee",
-          "update an employee role",
-        ],
-      },
-    ])
+    .prompt({
+      type: "list",
+      message: "Please select an action below",
+      name: "menuChoice",
+      choices: [
+        "view all departments",
+        "view all roles",
+        "view all employees",
+        "add a department",
+        "add a role",
+        "add an employee",
+        "update an employee role",
+      ],
+    })
     .then((data) => {
       if (data.menuChoice === "view all departments") {
         viewAllDepartments();
@@ -42,17 +118,18 @@ function displayMenu() {
       if (data.menuChoice === "add a department") {
         addDepartment();
       }
-      if (data.menuChoice === "add a roll") {
-        console.log("not ready");
+      if (data.menuChoice === "add a role") {
+        addRole();
       }
       if (data.menuChoice === "add an employee") {
-        console.log("not ready");
+        addEmployee();
       }
       if (data.menuChoice === "update an employee role") {
-        console.log("not ready");
+        updateEmployeeRole();
       }
     });
 }
+//Displays all the departments
 function viewAllDepartments() {
   db.query("SELECT * FROM department", function (err, results) {
     if (err) {
@@ -63,7 +140,7 @@ function viewAllDepartments() {
     displayMenu();
   });
 }
-
+//Displays all the roles
 function viewAllRoles() {
   db.query("SELECT * FROM role", function (err, results) {
     if (err) {
@@ -74,6 +151,7 @@ function viewAllRoles() {
     displayMenu();
   });
 }
+//Displays all employees
 function viewAllEmployees() {
   db.query("SELECT * FROM employee", function (err, results) {
     if (err) {
@@ -84,7 +162,7 @@ function viewAllEmployees() {
     displayMenu();
   });
 }
-
+//Adds a department to the table
 function addDepartment() {
   inquirer
     .prompt([
@@ -107,7 +185,7 @@ function addDepartment() {
       );
     });
 }
-
+//Adds a role to the function
 async function addRole() {
   const departments = await latestAllDepartmentsArray();
   inquirer
@@ -145,7 +223,7 @@ async function addRole() {
       );
     });
 }
-
+//Adds an employee to the table
 function addEmployee() {
   inquirer
     .prompt([
@@ -176,7 +254,7 @@ function addEmployee() {
       );
     });
 }
-
+//updates an employee role
 async function updateEmployeeRole() {
   const employees = await latestAllEmployeesArray();
   const roles = await latestAllRolesArray();
@@ -216,7 +294,3 @@ async function updateEmployeeRole() {
 }
 
 displayMenu();
-//init function calls selection function. Thats where the inquirer options begin. It will create the prompt lists. If prompt answer
-// === option run the db.query function. console.table shows the results in table format. would need to install with npm i
-// Need selection functions (display all, selection, etc)
-// Need adding functions (new department, employee, etc)
